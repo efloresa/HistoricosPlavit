@@ -1,0 +1,12 @@
+# macOS metadata
+.DS_Store
+._*
+**/._*
+
+#logs
+*.log
+**/logs/*.log*
+
+# excel files
+*.xls
+*.xlsx
