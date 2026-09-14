@@ -1,0 +1,16 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "HistoricoPlavit",
+            "request": "launch",
+            "mainClass": "atm.gob.ec.historicosplavit.HistoricoPlavit",
+            "projectName": "HistoricosPlavit",
+            "vmArgs": "-Datm.crypto.key=ynaht63y5SviQ$Ga7AiUnUdX"
+        }
+    ]
+}

@@ -1,17 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-package atm.gob.ec.mail;
-
 /**
  *
  * @author erik.flores
  */
 
-import atm.gob.ec.encriptacion.KeyManager;
+package atm.gob.ec.mail;
+
+import atm.gob.ec.security.AesCryptoService;
+import atm.gob.ec.security.CryptoService;
 import atm.gob.ec.utils.Utils;
 
 import javax.mail.Authenticator;
@@ -36,12 +31,11 @@ import javax.activation.FileDataSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.crypto.SecretKey;
-
 public class SendMail {
     
-    private static final Logger LOGGER = LogManager.getLogger(SendMail.class);
+    private static final Logger logger = LogManager.getLogger(SendMail.class);
     private static final Properties properties = Utils.getProperties();
+    private static String secret = System.getProperty("atm.crypto.key");
 
     private SendMail() {
         // Constructor privado para evitar instanciación
@@ -66,11 +60,11 @@ public class SendMail {
         String ps_password;
 
         try {
-            SecretKey key = KeyManager.loadKey();
-            ps_from = KeyManager.decrypt(properties.getProperty("MAIL.FROM"), key);
-            ps_password = KeyManager.decrypt(properties.getProperty("MAIL.PASS"), key);
+            CryptoService crypto = new AesCryptoService(secret);
+            ps_from = crypto.decrypt(properties.getProperty("MAIL.FROM"));
+            ps_password = crypto.decrypt(properties.getProperty("MAIL.PASS"));
         } catch (Exception e) {
-            LOGGER.error("Error desencriptando credenciales de correo", e);
+            logger.error("Error desencriptando credenciales de correo", e);
             return "Error obteniendo credenciales de correo.";
         }
 
@@ -111,10 +105,10 @@ public class SendMail {
             Session session = createMailSession(ps_smtp, ps_from, ps_password, ps_port);
             Message message = createMessage(session, ps_from, ps_to, ps_cc, ps_bcc, ps_subject, ps_message);
             Transport.send(message);
-            LOGGER.info("Correo enviado exitosamente.");
+            logger.info("Correo enviado exitosamente.");
             return "";
         } catch (MessagingException e) {
-            LOGGER.error("Error al enviar correo", e);
+            logger.error("Error al enviar correo", e);
             return e.toString();
         }
     }
@@ -147,10 +141,10 @@ public class SendMail {
             message.setSentDate(new Date());
 
             Transport.send(message);
-            LOGGER.info("Correo con adjunto enviado exitosamente.");
+            logger.info("Correo con adjunto enviado exitosamente.");
             return "";
         } catch (MessagingException e) {
-            LOGGER.error("Error al enviar correo con adjunto", e);
+            logger.error("Error al enviar correo con adjunto", e);
             return e.toString();
         }
     }

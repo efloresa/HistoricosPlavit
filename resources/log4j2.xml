@@ -1,28 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
     <Properties>
-        <Property name="baseDir">logs</Property>
-        <Property name="logPath">${baseDir}</Property>
-        <Property name="rollingFileName">HistoricosPlavit</Property>
+        <Property name="baseDir">
+            ${sys:user.dir}/logs
+        </Property>
+        <Property name="rollingFileName">
+            HistoricosPlavit
+        </Property>
     </Properties>
     <Appenders>
-        <Console name="console" target="SYSTEM_OUT">
-            <PatternLayout pattern="[%-5level] %d{DEFAULT} %c{1}.%M() - %msg%n%throwable{short.lineNumber}" />
+        <Console
+            name="console"
+            target="SYSTEM_OUT">
+            <PatternLayout
+                pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss} %c{1}.%M() - %msg%n"/>
         </Console>
-        <RollingFile name="rollingFile" fileName="${logPath}/${rollingFileName}.log" filePattern="${logPath}/${rollingFileName}_%d{yyyy-MM-dd}.log">
-            <PatternLayout pattern="[%-5level] %d{DEFAULT} %c{1}.%M() - %msg%n%throwable{short.lineNumber}" />
+        
+        <RollingFile
+            name="rollingFile"
+            fileName="${baseDir}/${rollingFileName}.log"
+            filePattern="${baseDir}/archive/${rollingFileName}_%d{yyyy-MM-dd}_%i.log"
+            append="true">
+            <PatternLayout
+                pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss} %c{1}.%M() - %msg%n"/>
             <Policies>
-                <!-- Causes a rollover if the log file is older than the current JVM's start time -->
-                <OnStartupTriggeringPolicy />
-                <!-- Causes a rollover once the date/time pattern no longer applies to the active file -->
-                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <!-- Rota automáticamente al cambiar de día (fusión diaria) -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <!-- Rota si el archivo actual alcanza los 5 MB dentro del mismo día -->
+                <SizeBasedTriggeringPolicy size="5MB"/>
             </Policies>
+            <DefaultRolloverStrategy max="50">
+                <!-- Estrategia para limpiar logs muy antiguos (ej. más de 30 días) -->
+                <Delete basePath="${baseDir}/archive" maxDepth="1">
+                    <IfFileName glob="${rollingFileName}_*.log"/>
+                    <IfLastModified age="30d"/>
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
     </Appenders>
     <Loggers>
-        <Root level="DEBUG" additivity="false">
-            <AppenderRef ref="console" />
-            <AppenderRef ref="rollingFile" />
+        <Root level="INFO">
+            <AppenderRef ref="console"/>
+            <AppenderRef ref="rollingFile"/>
         </Root>
     </Loggers>
 </Configuration>

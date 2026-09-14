@@ -1,12 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *
+ * @author erik.flores
  */
+
 package atm.gob.ec.historicosplavit;
 
-import atm.gob.ec.encriptacion.KeyManager;
 import atm.gob.ec.mail.SendMail;
+import atm.gob.ec.security.AesCryptoService;
+import atm.gob.ec.security.CryptoService;
 import atm.gob.ec.utils.Utils;
 
 import java.sql.Connection;
@@ -22,23 +23,16 @@ import java.util.Locale;
 
 import java.util.Properties;
 import java.util.regex.Pattern;
-import javax.crypto.SecretKey;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
 
-/**
- *
- * @author erik.flores
- */
 public class HistoricoPlavit {
     
     private static final Logger logger = LogManager.getLogger(HistoricoPlavit.class);
-    private static final LoggerContext context = Utils.configureLogging();
     private static final Properties propertie = Utils.getProperties();
     private static final String SEPARADOR = Pattern.quote("|");
     private static final SimpleDateFormat FORMATO = new SimpleDateFormat("dd-MMMMM-yyyy", new Locale("es", "ES"));
+    private static String secret = System.getProperty("atm.crypto.key");
 
     public HistoricoPlavit() throws Exception {
         
@@ -46,10 +40,10 @@ public class HistoricoPlavit {
     }
 
     private static Connection conectar() throws Exception {
-        SecretKey key = KeyManager.loadKey();
+        CryptoService crypto = new AesCryptoService(secret);
         String url = propertie.getProperty("DB.URL");
-        String username = KeyManager.decrypt(propertie.getProperty("DB.USER"), key);
-        String password = KeyManager.decrypt(propertie.getProperty("DB.PASSWD"), key);
+        String username = crypto.decrypt(propertie.getProperty("DB.USER"));
+        String password = crypto.decrypt(propertie.getProperty("DB.PASSWD"));
         
         Class.forName(propertie.getProperty("DB.DRIVER"));
         logger.info("Intentando conexión a la base de datos...");
